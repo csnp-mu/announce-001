@@ -878,7 +878,9 @@ struct AudioSettingsView: View {
     let onSelectFolder: () -> Void
     let onReset: () -> Void
     @Environment(\.dismiss) private var dismiss
-
+    
+    @State private var previewPlayer: AVAudioPlayer?
+    
     var body: some View {
         NavigationView {
             List {
@@ -908,6 +910,19 @@ struct AudioSettingsView: View {
                                 }
                             }
                             Spacer()
+                            
+                            // お試し再生ボタン
+                            Button(action: {
+                                playPreview(for: setting)
+                            }) {
+                                Image(systemName: "play.circle.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.title2)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 4)
+                            
+                            // ファイル選択ボタン
                             Button("選択") { onSelectFile(setting.resourceName) }
                                 .buttonStyle(.bordered)
                         }
@@ -936,6 +951,33 @@ struct AudioSettingsView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("完了") { dismiss() }
                 }
+            }
+        }
+    }
+    
+    private func playPreview(for setting: AudioFileSetting) {
+        // カスタム音声が設定されていればそれを再生、なければデフォルトを再生
+        if let customURL = setting.fileURL {
+            // カスタム音声を再生
+            do {
+                previewPlayer = try AVAudioPlayer(contentsOf: customURL)
+                previewPlayer?.play()
+            } catch {
+                print("❌ カスタム音声の再生エラー：\(error)")
+            }
+        } else {
+            // デフォルト音声を再生
+            if let defaultURL = Bundle.main.url(forResource: setting.resourceName, withExtension: "wav")
+                ?? Bundle.main.url(forResource: setting.resourceName, withExtension: "mp3")
+                ?? Bundle.main.url(forResource: setting.resourceName, withExtension: "m4a") {
+                do {
+                    previewPlayer = try AVAudioPlayer(contentsOf: defaultURL)
+                    previewPlayer?.play()
+                } catch {
+                    print("❌ デフォルト音声の再生エラー：\(error)")
+                }
+            } else {
+                print("❌ 音声ファイルが見つかりません：\(setting.resourceName)")
             }
         }
     }
