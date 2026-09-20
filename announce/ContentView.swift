@@ -19,6 +19,7 @@ struct AudioFileSetting: Identifiable {
     let resourceName: String
     let displayName: String
     var fileURL: URL?
+    var originalFileName: String?  // 追加：オリジナルファイル名
 }
 
 final class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
@@ -637,7 +638,8 @@ struct ContentView: View {
                 throw AudioImportError.unsupportedFile(sourceURL.lastPathComponent)
             }
             let destination = try copyAudioFileToDocuments(from: sourceURL, resourceName: currentAudioType)
-            setAudioFile(destination, for: currentAudioType)
+//            setAudioFile(destination, for: currentAudioType)
+            setAudioFile(destination, for: currentAudioType, originalFileName: sourceURL.lastPathComponent)  // 修正
             saveAudioFilesToUserDefaults()
             audioStatusMessage = "\(currentAudioType) に音声を設定しました"
         } catch {
@@ -786,9 +788,10 @@ struct ContentView: View {
         return destination
     }
 
-    private func setAudioFile(_ url: URL, for resourceName: String) {
+    private func setAudioFile(_ url: URL, for resourceName: String, originalFileName: String? = nil) {  // 修正
         guard let index = audioSettings.firstIndex(where: { $0.resourceName == resourceName }) else { return }
         audioSettings[index].fileURL = url
+        audioSettings[index].originalFileName = originalFileName  // 追加
         audioManager.customAudioFiles[resourceName] = url
         audioManager.useDefaultAudio = false
         useCustomAudio = true
@@ -811,6 +814,7 @@ struct ContentView: View {
             audioManager.customAudioFiles[resourceName] = url
             if let index = audioSettings.firstIndex(where: { $0.resourceName == resourceName }) {
                 audioSettings[index].fileURL = url
+                audioSettings[index].originalFileName = url.lastPathComponent  // 追加
             }
         }
 
@@ -899,7 +903,9 @@ struct AudioSettingsView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(setting.displayName).font(.headline)
                                 if let fileURL = setting.fileURL {
-                                    Text("✅ \(fileURL.lastPathComponent)")
+                                    // オリジナルファイル名を表示
+//                                    Text("✅ \(fileURL.lastPathComponent)")
+                                    Text("✅ \(setting.originalFileName ?? fileURL.lastPathComponent)")
                                         .font(.caption)
                                         .foregroundColor(.green)
                                         .lineLimit(1)
@@ -911,7 +917,6 @@ struct AudioSettingsView: View {
                             }
                             Spacer()
                             
-                            // お試し再生ボタン
                             Button(action: {
                                 playPreview(for: setting)
                             }) {
@@ -922,7 +927,6 @@ struct AudioSettingsView: View {
                             .buttonStyle(.plain)
                             .padding(.horizontal, 4)
                             
-                            // ファイル選択ボタン
                             Button("選択") { onSelectFile(setting.resourceName) }
                                 .buttonStyle(.bordered)
                         }
