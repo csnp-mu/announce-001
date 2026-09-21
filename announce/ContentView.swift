@@ -11,7 +11,7 @@ struct ScheduleItem: Identifiable {
     let date: Date
     let displayName: String
     let resourceName: String
-    let caption: String  // 追加
+    let caption: String
 }
 
 struct AudioFileSetting: Identifiable {
@@ -19,7 +19,7 @@ struct AudioFileSetting: Identifiable {
     let resourceName: String
     let displayName: String
     var fileURL: URL?
-    var originalFileName: String?  // 追加：オリジナルファイル名
+    var originalFileName: String?
 }
 
 final class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
@@ -47,14 +47,12 @@ final class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         print("   URL: \(audioURL)")
         print("   拡張子：\(audioURL.pathExtension)")
         
-        // ファイルの存在確認
         let fileManager = FileManager.default
         if !fileManager.fileExists(atPath: audioURL.path) {
             print("❌ ファイルが存在しません：\(audioURL.path)")
             return
         }
         
-        // ファイルサイズ確認
         do {
             let attributes = try fileManager.attributesOfItem(atPath: audioURL.path)
             let fileSize = attributes[.size] as? Int ?? 0
@@ -87,7 +85,7 @@ final class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
 
     func stop() {
         player?.stop()
-        player = nil  // ← nil にしない（バックグラウンド再生のため）
+        player = nil
         isPlaying = false
         currentTrackName = ""
     }
@@ -100,7 +98,6 @@ final class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
         DispatchQueue.main.async {
             self.isPlaying = false
             self.currentTrackName = ""
-            // player は nil にしない
         }
     }
 }
@@ -135,7 +132,7 @@ struct ContentView: View {
     @StateObject private var audioManager = AudioPlayerManager()
     @State private var audioSettings: [AudioFileSetting] = []
     @State private var showingAudioSettings = false
-    @State private var audioStatusMessage = "標準音声を使用中"
+    @State private var audioStatusMessage = "標準音声（©音読さん）を使用中"
     @State private var audioErrorMessage = ""
     @State private var showAudioError = false
 
@@ -143,13 +140,6 @@ struct ContentView: View {
     @State private var showingSubscription = false
     
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
-//    private let allAudioTypes = [
-//        "01 移動開始", "02 課題読む", "03 課題開始", "04 課題終了一分前",
-//        "05 課題終了_移動開始", "06 課題終了", "17 開始2分前",
-//        "18 開始1分前", "19 休憩に入る", "20 放送終了のアナウンス",
-//        "26 テストラン開始1分前"
-//    ]
     
     private let allAudioTypes = [
         "01 移動開始", "02 課題読む", "03 課題開始", "04 課題終了一分前",
@@ -159,8 +149,9 @@ struct ContentView: View {
         "26 テストラン開始1分前",
         "特別70 開始5分前", "特別71 休憩", "特別72 昼休憩",
         "特別73 休憩", "特別74 試験終了", "特別75 試験終了_集合",
-        "sound01", "sound02", "sound03", "sound04", "sound05",
-        "sound06", "sound07", "sound08", "sound09", "sound10"
+        "特別76 課題準備",
+        "custom01", "custom02", "custom03", "custom04", "custom05",
+        "custom06", "custom07", "custom08", "custom09", "custom10"
     ]
 
     private let supportedAudioExtensions: Set<String> = [
@@ -348,7 +339,7 @@ struct ContentView: View {
             if horizontalSizeClass == .regular {
                 HStack(spacing: 12) { testAudioButtons }
             } else {
-                HStack(spacing: 12) { testAudioButtons }  // ← iPhone も横並び
+                HStack(spacing: 12) { testAudioButtons }
             }
         }
         .buttonStyle(.borderedProminent)
@@ -390,7 +381,7 @@ struct ContentView: View {
                 }
             }
   
-            // CSV 選択ボタン（サブスク制限）
+// CSV 選択ボタン（サブスク制限）
             Button("📁 CSV 選択") { showingCSVPicker = true }
                 .buttonStyle(.bordered)
                 .padding(.top, 12)
@@ -401,7 +392,7 @@ struct ContentView: View {
             Divider()
                 .padding(.vertical, 12)
 
-            // 音声設定ボタン（サブスク制限）
+// 音声設定ボタン（サブスク制限）
             let configuredCount = audioSettings.filter { $0.fileURL != nil }.count
             let audioButtonText = useCustomAudio
                 ? "音声設定 (\(configuredCount)/\(allAudioTypes.count))"
@@ -500,9 +491,6 @@ struct ContentView: View {
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 }
-//                                Text(item.resourceName)
-//                                    .font(.caption)
-//                                    .foregroundColor(.secondary)
                             }
                             Spacer()
                         }
@@ -537,7 +525,6 @@ struct ContentView: View {
         nextDisplayName = next.displayName
 
         if diff <= 1 {
-//            audioManager.play(resourceName: next.resourceName, isMuted: isMuted)
             if next.resourceName != "音声なし" {
                 audioManager.play(resourceName: next.resourceName, isMuted: isMuted)
             } else {
@@ -556,7 +543,6 @@ struct ContentView: View {
     private func toggleSchedule() {
         isRunning.toggle()
         if !isRunning {
-            // audioManager.stop() は呼ばない（バックグラウンド再生継続のため）
             nextDisplayName = "なし"
         }
     }
@@ -638,8 +624,7 @@ struct ContentView: View {
                 throw AudioImportError.unsupportedFile(sourceURL.lastPathComponent)
             }
             let destination = try copyAudioFileToDocuments(from: sourceURL, resourceName: currentAudioType)
-//            setAudioFile(destination, for: currentAudioType)
-            setAudioFile(destination, for: currentAudioType, originalFileName: sourceURL.lastPathComponent)  // 修正
+            setAudioFile(destination, for: currentAudioType, originalFileName: sourceURL.lastPathComponent)
             saveAudioFilesToUserDefaults()
             audioStatusMessage = "\(currentAudioType) に音声を設定しました"
         } catch {
@@ -788,10 +773,10 @@ struct ContentView: View {
         return destination
     }
 
-    private func setAudioFile(_ url: URL, for resourceName: String, originalFileName: String? = nil) {  // 修正
+    private func setAudioFile(_ url: URL, for resourceName: String, originalFileName: String? = nil) {
         guard let index = audioSettings.firstIndex(where: { $0.resourceName == resourceName }) else { return }
         audioSettings[index].fileURL = url
-        audioSettings[index].originalFileName = originalFileName  // 追加
+        audioSettings[index].originalFileName = originalFileName
         audioManager.customAudioFiles[resourceName] = url
         audioManager.useDefaultAudio = false
         useCustomAudio = true
@@ -814,7 +799,7 @@ struct ContentView: View {
             audioManager.customAudioFiles[resourceName] = url
             if let index = audioSettings.firstIndex(where: { $0.resourceName == resourceName }) {
                 audioSettings[index].fileURL = url
-                audioSettings[index].originalFileName = url.lastPathComponent  // 追加
+                audioSettings[index].originalFileName = url.lastPathComponent
             }
         }
 
@@ -839,7 +824,7 @@ struct ContentView: View {
                 try? FileManager.default.removeItem(at: documents.appendingPathComponent("\(audioType).\(ext)"))
             }
         }
-        audioStatusMessage = "標準音声に戻しました"
+        audioStatusMessage = "標準音声（©音読さん）に戻しました"
     }
 
     private func showAudioErrorMessage(_ message: String) {
@@ -903,14 +888,13 @@ struct AudioSettingsView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(setting.displayName).font(.headline)
                                 if let fileURL = setting.fileURL {
-                                    // オリジナルファイル名を表示
-//                                    Text("✅ \(fileURL.lastPathComponent)")
+
                                     Text("✅ \(setting.originalFileName ?? fileURL.lastPathComponent)")
                                         .font(.caption)
                                         .foregroundColor(.green)
                                         .lineLimit(1)
                                 } else {
-                                    Text("標準音声を使用")
+                                    Text("標準音声（©音読さん）を使用")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -939,7 +923,7 @@ struct AudioSettingsView: View {
                         .onChange(of: useCustomAudio) { enabled in
                             audioManager.useDefaultAudio = !enabled
                         }
-                    Text(useCustomAudio ? "設定済みの項目はカスタム音声、それ以外は標準音声で再生します。" : "すべて標準音声で再生します。")
+                    Text(useCustomAudio ? "設定済みの項目はカスタム音声、それ以外は標準音声（©音読さん）で再生します。" : "すべて標準音声（©音読さん）で再生します。")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -960,9 +944,7 @@ struct AudioSettingsView: View {
     }
     
     private func playPreview(for setting: AudioFileSetting) {
-        // カスタム音声が設定されていればそれを再生、なければデフォルトを再生
         if let customURL = setting.fileURL {
-            // カスタム音声を再生
             do {
                 previewPlayer = try AVAudioPlayer(contentsOf: customURL)
                 previewPlayer?.play()
@@ -970,7 +952,6 @@ struct AudioSettingsView: View {
                 print("❌ カスタム音声の再生エラー：\(error)")
             }
         } else {
-            // デフォルト音声を再生
             if let defaultURL = Bundle.main.url(forResource: setting.resourceName, withExtension: "wav")
                 ?? Bundle.main.url(forResource: setting.resourceName, withExtension: "mp3")
                 ?? Bundle.main.url(forResource: setting.resourceName, withExtension: "m4a") {

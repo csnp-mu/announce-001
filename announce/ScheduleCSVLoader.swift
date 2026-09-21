@@ -78,7 +78,6 @@ struct ScheduleCSVLoader {
 
         var items: [ScheduleItem] = []
         
-        // 今日の日付を取得（Date 列が空の場合に使用）
         let today = Date()
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -97,19 +96,16 @@ struct ScheduleCSVLoader {
             var dateText = columns[0].trimmingCharacters(in: .whitespaces)
             let timeText = columns[1].trimmingCharacters(in: .whitespaces)
             var announceText = columns[2].trimmingCharacters(in: .whitespaces)
-            let captionText = columns.count >= 4 ? columns[3] : ""  // Caption 列
+            let captionText = columns.count >= 4 ? columns[3] : ""
 
-            // Time 列が空の場合はその行をスキップ
             if timeText.isEmpty {
                 continue
             }
             
-            // Date 列が空の場合、今日の日付を使用
             if dateText.isEmpty {
                 dateText = todayString
             }
             
-            // Announce 列が空または "0" の場合は "音声なし"
             if announceText.isEmpty || announceText == "0" {
                 announceText = "音声なし"
             }
@@ -202,12 +198,10 @@ struct ScheduleCSVLoader {
     }
     
     private func normalizeResourceName(_ value: String) -> String {
-        // "音声なし" の場合はそのまま返す
         if value == "音声なし" {
             return value
         }
         
-        // 先頭の数字を 2 桁に揃える（例：「1 課題」→「01 課題」）
         let components = value.components(separatedBy: " ")
         guard let first = components.first,
               let number = Int(first),
@@ -215,7 +209,6 @@ struct ScheduleCSVLoader {
             return value
         }
         
-        // 1 桁の数字を 2 桁に（例：1 → 01, 9 → 09）
         let paddedNumber = String(format: "%02d", number)
         return "\(paddedNumber) \(components.dropFirst().joined(separator: " "))"
     }
