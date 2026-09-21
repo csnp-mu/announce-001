@@ -103,7 +103,7 @@ final class AudioPlayerManager: NSObject, ObservableObject, AVAudioPlayerDelegat
 }
 
 enum DemoMode {
-    case demo1, demo2, demo3
+    case demo1, demo2, demo3, demo4, demo5, demo6
 }
 
 struct ContentView: View {
@@ -451,22 +451,72 @@ struct ContentView: View {
         .padding()
     }
 
+//    @ViewBuilder
+//    private var demoButtons: some View {
+//        Button("🗓️ 1") {
+//            demoMode = .demo1
+//            schedule = demoSchedule1()
+//            csvStatusMessage = "デモ 1 を使用中"
+//            csvFileName = "領域 1・5 を 1 回分"
+//        }
+//        .buttonStyle(.borderedProminent)
+//        .padding(.horizontal, 6)
+//        Button("🗓️ 2") { loadCSV2(); demoMode = .demo2 }
+//            .buttonStyle(.borderedProminent)
+//            .padding(.horizontal, 6)
+//        Button("🗓️ 3") { loadCSV3(); demoMode = .demo3 }
+//            .buttonStyle(.borderedProminent)
+//            .padding(.horizontal, 6)
+//        Button("🗓️ 4") { loadCSV4(); demoMode = .demo4 }
+//            .buttonStyle(.borderedProminent)
+//            .padding(.horizontal, 6)
+//        Button("🗓️ 5") { loadCSV5(); demoMode = .demo5 }
+//            .buttonStyle(.borderedProminent)
+//            .padding(.horizontal, 6)
+//        Button("🗓️ 6") { loadCSV6(); demoMode = .demo6 }
+//            .buttonStyle(.borderedProminent)
+//            .padding(.horizontal, 6)
+//    }
+        
+    
     @ViewBuilder
     private var demoButtons: some View {
-        Button("🗓️ 1") {
-            demoMode = .demo1
-            schedule = demoSchedule1()
-            csvStatusMessage = "デモ 1 を使用中"
-            csvFileName = "領域 1・5 1 回分"
+        VStack(spacing: 12) {
+            // 1 段目：ボタン 1, 2, 3
+            HStack(spacing: 8) {
+                Button("🗓️ 1") {
+                    demoMode = .demo1
+                    schedule = demoSchedule1()
+                    csvStatusMessage = "デモ 1 を使用中"
+                    csvFileName = "領域 1・5 1 回分"
+                }
+                .buttonStyle(.borderedProminent)
+                .padding(.horizontal, 6)
+                
+                Button("🗓️ 2") { loadCSV2(); demoMode = .demo2 }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.horizontal, 6)
+                
+                Button("🗓️ 3") { loadCSV3(); demoMode = .demo3 }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.horizontal, 6)
+            }
+            
+            // 2 段目：ボタン 4, 5, 6
+            HStack(spacing: 8) {
+                Button("🗓️ 4") { loadCSV4(); demoMode = .demo4 }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.horizontal, 6)
+                
+                Button("🗓️ 5") { loadCSV5(); demoMode = .demo5 }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.horizontal, 6)
+                
+                Button("🗓️ 6") { loadCSV6(); demoMode = .demo6 }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.horizontal, 6)
+            }
         }
-        .buttonStyle(.borderedProminent)
-        .padding(.horizontal, 6)
-        Button("🗓️ 2") { loadCSV2(); demoMode = .demo2 }
-            .buttonStyle(.borderedProminent)
-            .padding(.horizontal, 6)
-        Button("🗓️ 3") { loadCSV3(); demoMode = .demo3 }
-            .buttonStyle(.borderedProminent)
-            .padding(.horizontal, 6)
     }
 
     private var scheduleSection: some View {
@@ -577,6 +627,30 @@ struct ContentView: View {
         do {
             schedule = try ScheduleCSVLoader().loadBundledCSV(named: "demo234")
             csvFileName = "demo234.csv"
+            csvStatusMessage = "CSV 読み込み成功：\(schedule.count) 件"
+        } catch { showCSVErrorMessage(error) }
+    }
+    
+    private func loadCSV4() {
+        do {
+            schedule = try ScheduleCSVLoader().loadBundledCSV(named: "技能評価15")
+            csvFileName = "技能評価15.csv"
+            csvStatusMessage = "CSV 読み込み成功：\(schedule.count) 件"
+        } catch { showCSVErrorMessage(error) }
+    }
+
+    private func loadCSV5() {
+        do {
+            schedule = try ScheduleCSVLoader().loadBundledCSV(named: "総合評価15")
+            csvFileName = "総合評価15.csv"
+            csvStatusMessage = "CSV 読み込み成功：\(schedule.count) 件"
+        } catch { showCSVErrorMessage(error) }
+    }
+
+    private func loadCSV6() {
+        do {
+            schedule = try ScheduleCSVLoader().loadBundledCSV(named: "初回面談")
+            csvFileName = "初回面談.csv"
             csvStatusMessage = "CSV 読み込み成功：\(schedule.count) 件"
         } catch { showCSVErrorMessage(error) }
     }
