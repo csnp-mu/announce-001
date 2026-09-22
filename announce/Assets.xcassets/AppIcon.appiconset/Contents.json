@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "announce_AppIcon.png",
+      "filename" : "announce_AppIcon_v2_Light_1024.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "announce_AppIcon_Dark.png",
+      "filename" : "announce_AppIcon_v2_Dark_1024.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "announce_AppIcon_Dark 1.png",
+      "filename" : "announce_AppIcon_v2_Dark_1024 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -76,13 +76,13 @@
       "size" : "512x512"
     },
     {
-      "filename" : "announce_AppIcon 2.png",
+      "filename" : "announce_AppIcon_v2_Light_1024 1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"
     },
     {
-      "filename" : "announce_AppIcon 1.png",
+      "filename" : "announce_AppIcon_v2_Light_1024 2.png",
       "idiom" : "universal",
       "platform" : "watchos",
       "size" : "1024x1024"
