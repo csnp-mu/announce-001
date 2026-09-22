@@ -142,16 +142,21 @@ struct ContentView: View {
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     private let allAudioTypes = [
-        "01 移動開始", "02 課題読む", "03 課題開始", "04 課題終了一分前",
-        "05 課題終了_移動開始", "06 課題終了",
-        "13 課題終了_フィードバック開始", "14 フィードバック終了_移動開始",
-        "17 開始2分前", "18 開始1分前", "19 休憩に入る", "20 放送終了のアナウンス",
-        "26 テストラン開始1分前",
-        "特別70 開始5分前", "特別71 休憩", "特別72 昼休憩",
-        "特別73 休憩", "特別74 試験終了", "特別75 試験終了_集合",
-        "特別76 課題準備",
-        "custom01", "custom02", "custom03", "custom04", "custom05",
-        "custom06", "custom07", "custom08", "custom09", "custom10"
+        "01_移動開始",
+        "02_課題閲覧", "02_課題準備",
+        "03_課題開始",
+        "04_課題終了1分前",
+        "05_課題終了", "05_課題終了_移動開始", "05_課題終了_FB開始",
+        "06_FB終了_移動開始",
+        "11_開始5分前", "12_開始2分前", "13_開始1分前", "13_TR開始1分前",
+        "21_休憩",
+//        "21_休憩1050", "21_休憩1450",
+//        "22_昼休憩1300",
+        "91_試験終了",
+//        "91_試験終了_集合r204",
+        "92_放送終了",
+        "custom_01", "custom_02", "custom_03", "custom_04", "custom_05",
+        "custom_06", "custom_07", "custom_08", "custom_09", "custom_10"
     ]
 
     private let supportedAudioExtensions: Set<String> = [
@@ -347,10 +352,10 @@ struct ContentView: View {
 
     @ViewBuilder
     private var testAudioButtons: some View {
-        Button("閲覧") { audioManager.play(resourceName: "02 課題読む", isMuted: isMuted) }
+        Button("閲覧") { audioManager.play(resourceName: "02_課題閲覧", isMuted: isMuted) }
             .buttonStyle(.borderedProminent)
             .padding(.horizontal, 6)
-        Button("開始") { audioManager.play(resourceName: "03 課題開始", isMuted: isMuted) }
+        Button("開始") { audioManager.play(resourceName: "03_課題開始", isMuted: isMuted) }
             .buttonStyle(.borderedProminent)
             .padding(.horizontal, 6)
         Button("終了") { audioManager.play(resourceName: "06 課題終了", isMuted: isMuted) }
@@ -450,34 +455,6 @@ struct ContentView: View {
         }
         .padding()
     }
-
-//    @ViewBuilder
-//    private var demoButtons: some View {
-//        Button("🗓️ 1") {
-//            demoMode = .demo1
-//            schedule = demoSchedule1()
-//            csvStatusMessage = "デモ 1 を使用中"
-//            csvFileName = "領域 1・5 を 1 回分"
-//        }
-//        .buttonStyle(.borderedProminent)
-//        .padding(.horizontal, 6)
-//        Button("🗓️ 2") { loadCSV2(); demoMode = .demo2 }
-//            .buttonStyle(.borderedProminent)
-//            .padding(.horizontal, 6)
-//        Button("🗓️ 3") { loadCSV3(); demoMode = .demo3 }
-//            .buttonStyle(.borderedProminent)
-//            .padding(.horizontal, 6)
-//        Button("🗓️ 4") { loadCSV4(); demoMode = .demo4 }
-//            .buttonStyle(.borderedProminent)
-//            .padding(.horizontal, 6)
-//        Button("🗓️ 5") { loadCSV5(); demoMode = .demo5 }
-//            .buttonStyle(.borderedProminent)
-//            .padding(.horizontal, 6)
-//        Button("🗓️ 6") { loadCSV6(); demoMode = .demo6 }
-//            .buttonStyle(.borderedProminent)
-//            .padding(.horizontal, 6)
-//    }
-        
     
     @ViewBuilder
     private var demoButtons: some View {
@@ -488,7 +465,7 @@ struct ContentView: View {
                     demoMode = .demo1
                     schedule = demoSchedule1()
                     csvStatusMessage = "デモ 1 を使用中"
-                    csvFileName = "領域 1・5 1 回分"
+                    csvFileName = "領域 1・5 を 1 回分 再生"
                 }
                 .buttonStyle(.borderedProminent)
                 .padding(.horizontal, 6)
@@ -763,7 +740,7 @@ struct ContentView: View {
                         }
 
                         showAudioErrorMessage(
-                            "\(message)\n例：02 課題読む.mp3"
+                            "\(message)\n例：02_課題閲覧.mp3"
                         )
                         return
                     }
@@ -909,10 +886,10 @@ struct ContentView: View {
     private func demoSchedule1() -> [ScheduleItem] {
         let now = Date()
         return [
-            (4, "閲覧", "02 課題読む"),
-            (124, "開始", "03 課題開始"),
-            (364, "終了 1 分前", "04 課題終了一分前"),
-            (424, "終了", "06 課題終了")
+            (4, "閲覧", "02_課題閲覧"),
+            (124, "開始", "03_課題開始"),
+            (364, "終了 1 分前", "04_課題終了1分前"),
+            (424, "終了", "06_課題終了")
         ].map { seconds, display, resource in
             ScheduleItem(
                 date: now.addingTimeInterval(TimeInterval(seconds)),
