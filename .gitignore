@@ -1,28 +1,14 @@
-# ===========================================
-# announce-001 リポジトリ用 .gitignore
-# README.md のみを公開し、他はすべて無視
-# ===========================================
-
-# announce フォルダ全体を無視
 announce/
-
-# Xcode プロジェクト全体を無視
 *.xcodeproj/
-
-# ビルド成果物を無視
 build/
 DerivedData/
 *.app/
 *.ipa
 *.xcarchive/
-
-# macOS システムファイルを無視
 .DS_Store
 .AppleDouble
 .LSOverride
 ._*
-
-# 一時ファイル、キャッシュを無視
 *.log
 *.tmp
 *.swp
